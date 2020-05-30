@@ -141,13 +141,6 @@ const Example: React.FC = () => {  // 边tooltip坐标
         );
 
         graph.addItem('edge', {
-          source: model.id,
-          target: target.toString(),
-          sourceAnchor: 0,
-          targetAnchor: 10,
-        });
-
-        graph.addItem('edge', {
           source: target.toString(),
           target: model.id,
           sourceAnchor: 0,
@@ -171,13 +164,6 @@ const Example: React.FC = () => {  // 边tooltip坐标
 
           },
         );
-
-        graph.addItem('edge', {
-          source: model.id,
-          target: target.toString(),
-          sourceAnchor: 0,
-          targetAnchor: 10,
-        });
 
         graph.addItem('edge', {
           source: target.toString(),

@@ -213,20 +213,20 @@ G6.registerEdge('line-arrow', {
 
     const stroke = (cfg.style && cfg.style.stroke) || this.options.style.stroke;
     const startArrow = (cfg.style && cfg.style.startArrow) || undefined;
-    // const endArrow = (cfg.style && cfg.style.endArrow) || undefined;
+    const endArrow = (cfg.style && cfg.style.endArrow) || undefined;
 
     const keyShape = group.addShape('path', {
       attrs: {
         path: [
           ['M', startPoint.x, startPoint.y],
-          ['L', endPoint.x / 3 + (2 / 3) * startPoint.x, startPoint.y],
+          // ['L', endPoint.x / 3 + (2 / 3) * startPoint.x, startPoint.y],
           ['L', endPoint.x / 3 + (2 / 3) * startPoint.x, endPoint.y],
           ['L', endPoint.x, endPoint.y],
         ],
         stroke,
         lineWidth: 1,
         startArrow,
-        // endArrow
+        endArrow
       },
       className: 'edge-shape',
       name: 'edge-shape',
