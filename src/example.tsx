@@ -21,29 +21,29 @@ const Example: React.FC = () => {  // 边tooltip坐标
   const [nodeContextMenuX, setNodeContextMenuX] = React.useState(0)
   const [nodeContextMenuY, setNodeContextMenuY] = React.useState(0)
 
+  const data = {
+    nodes: [
+      {
+        id: '1-1',
+        x: 50,
+        y: 100,
+        anchorPoints: [[0, 0.5], [1, 0.5]]
+      },
+    ],
+    edges: [
+
+    ]
+  };
 
   React.useEffect(() => {
-
-    const data = {
-      nodes: [
-        {
-          id: '1', x: 50, y: 100,
-        },
-      ],
-      edges: [
-
-      ]
-    };
-
-
     const graph = new G6.Graph({
       container: 'container',
       width: 1200,
       height: 800,
       renderer: 'svg',
       modes: {
-        default: ['drag-node'],
-        edit: ['click-select'],
+        // default: ['drag-node'],
+        // edit: ['click-select'],
         // addEdge: ['click-add-edge', 'click-select'],
       },
       defaultEdge: {
@@ -59,8 +59,8 @@ const Example: React.FC = () => {  // 边tooltip坐标
         type: 'pipeline-node',
         size: [120, 40],
         linkPoints: {
-          top: true,
-          bottom: true,
+          top: false,
+          bottom: false,
           left: true,
           right: true,
           fill: '#fff',
@@ -106,7 +106,6 @@ const Example: React.FC = () => {  // 边tooltip坐标
 
     // 监听鼠标进入节点事件
     graph.on('node:mouseenter', (evt: { item: any; }) => {
-      console.log('------------------------------>mouseenter');
       const node = evt.item;
       // 激活该节点的 hover 状态
       graph.setItemState(node, 'hover', true);
@@ -121,11 +120,13 @@ const Example: React.FC = () => {  // 边tooltip坐标
 
     graph.on('node:click', (evt: any) => {
       const { item } = evt;
-
       const shape = evt.target.cfg.name;
+
       if (shape === 'right-plus') {
-        const source = item._cfg.id;
-        const target = Number(source) + 1;
+        const source = item._cfg.id.split('-');
+        const targetGroup = Number(source[0]) + 1;
+        const targeNode = 1;
+        const target = targetGroup + '-' + targeNode;
 
         const model = item.getModel()
         const { x, y } = model
@@ -133,46 +134,56 @@ const Example: React.FC = () => {  // 边tooltip坐标
         graph.addItem('node',
           {
             id: target.toString(),
-            // title: 'Task' + target,
-            x: Number(point.x) + 200,
+            x: Number(point.x) + 120,
             y: Number(point.y),
-
           },
         );
 
         graph.addItem('edge', {
           source: target.toString(),
           target: model.id,
-          sourceAnchor: 0,
-          targetAnchor: 10,
         });
       }
 
 
+      // 添加子的时候,需要关联边到当前source 的创建者,与被创建者
       if (shape === 'bottom-plus') {
-        const source = item._cfg.id;
-        const target = Number(source) + 10;
-
+        const source = item._cfg.id.split('-');
+        const group = source[0];
+        const targeNode = Number(source[1]) + 1;
+        const target = group + '-' + targeNode;
         const model = item.getModel()
         const { x, y } = model
         const point = graph.getCanvasByPoint(x, y)
         graph.addItem('node',
           {
             id: target.toString(),
-            x: Number(point.x) + 200,
-            y: Number(point.y) + 200,
-
+            x: Number(point.x),
+            y: Number(point.y) + 50,
           },
         );
-
+        //添加第二组节点到第一组开始
         graph.addItem('edge', {
           source: target.toString(),
           target: model.id,
-          sourceAnchor: 0,
-          targetAnchor: 10,
         });
-      }
+        // graph.addItem('edge', {
+        //   source: target.toString(),
+        //   target: Number(group) - 1 + '-' + 1,
+        //   shape: 'cubic-vertical',
+        //   sourceAnchor: 0,
+        //   targetAnchor: 0
+        // });
 
+        // graph.addItem('edge', {
+        //   source: target.toString(),
+        //   target: Number(group) + 1 + '-' + 1,
+        //   shape: 'cubic-vertical',
+        //   sourceAnchor: 0,
+        //   targetAnchor: 0
+        // });
+
+      }
     });
 
   });

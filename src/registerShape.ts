@@ -57,11 +57,8 @@ const ICON_MAP: any = {
   b: 'https://gw.alipayobjects.com/mdn/rms_8fd2eb/afts/img/A*sxK0RJ1UhNkAAAAAAAAAAABkARQnAQ',
 }
 
-
-const Util = G6.Util;
 G6.registerNode('pipeline-node', {
   draw(cfg: any, group: any) {
-    const r = 7;
     const rect = group.addShape('rect', {
       attrs: {
         fill: 'lightblue',
@@ -74,31 +71,31 @@ G6.registerNode('pipeline-node', {
       },
       draggable: true,
     });
+    
 
-    const textConfig = {
-      textAlign: 'left',
-      textBaseline: 'top',
-    };
-    group.addShape('dom', {
-      attrs: {
-        ...textConfig,
-        width: 120,
-        height: 40,
-        x: 10,
-        y: 5,
-        html: `
-        <select class="selectBox">
-          <option value="grapefruit">task1</option>
-          <option value="lime">task2</option>
-          <option value="coconut">task3</option>
-          <option value="mango">task4</option> 
-        </select>
-          `
-      },
-    });
+    // const textConfig = {
+    //   textAlign: 'left',
+    //   textBaseline: 'top',
+    // };
+    // group.addShape('dom', {
+    //   attrs: {
+    //     ...textConfig,
+    //     width: 120,
+    //     height: 40,
+    //     x: 10,
+    //     y: 5,
+    //     html: `
+    //     <select class="selectBox">
+    //       <option value="grapefruit">task1</option>
+    //       <option value="lime">task2</option>
+    //       <option value="coconut">task3</option>
+    //       <option value="mango">task4</option> 
+    //     </select>
+    //       `
+    //   },
+    // });
     return rect;
   },
-
 
   setState(name: any, value: any, item: any) {
     if (name === 'hover' && value) {
@@ -185,8 +182,6 @@ G6.registerNode('pipeline-node', {
         group.removeChild(group.get('children')[shape.length - 2]);
         group.removeChild(group.get('children')[shape.length - 1]);
       }, 1000);
-
-
     }
   },
 
