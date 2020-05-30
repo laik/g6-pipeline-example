@@ -47,10 +47,10 @@ const Example: React.FC = () => {  // 边tooltip坐标
         // addEdge: ['click-add-edge', 'click-select'],
       },
       defaultEdge: {
-        type: 'line',
+        type: 'line-arrow',
         style: {
           // stroke: #fff,
-          endArrow: true,
+          // endArrow: true,
           lineWidth: 1,
         },
         // 其他配置

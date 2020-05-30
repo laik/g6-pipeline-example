@@ -200,3 +200,39 @@ G6.registerNode('pipeline-node', {
   'single-node'
 );
 
+
+G6.registerEdge('line-arrow', {
+  options: {
+    style: {
+      stroke: '#ccc',
+    },
+  },
+  draw(cfg: any, group: any) {
+    const startPoint = cfg.startPoint;
+    const endPoint = cfg.endPoint;
+
+    const stroke = (cfg.style && cfg.style.stroke) || this.options.style.stroke;
+    const startArrow = (cfg.style && cfg.style.startArrow) || undefined;
+    // const endArrow = (cfg.style && cfg.style.endArrow) || undefined;
+
+    const keyShape = group.addShape('path', {
+      attrs: {
+        path: [
+          ['M', startPoint.x, startPoint.y],
+          ['L', endPoint.x / 3 + (2 / 3) * startPoint.x, startPoint.y],
+          ['L', endPoint.x / 3 + (2 / 3) * startPoint.x, endPoint.y],
+          ['L', endPoint.x, endPoint.y],
+        ],
+        stroke,
+        lineWidth: 1,
+        startArrow,
+        // endArrow
+      },
+      className: 'edge-shape',
+      name: 'edge-shape',
+    });
+    return keyShape;
+  },
+});
+
+
