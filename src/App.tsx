@@ -1,10 +1,10 @@
 import React from 'react';
-import Example from './example'
+import Example from "./graph";
 
 function App() {
   return (
     <div className="App">
-     <Example/>
+      <Example />
     </div>
   );
 }
