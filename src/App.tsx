@@ -1,5 +1,5 @@
 import React from 'react';
-import Example from "./graph";
+import Example from "./graphs";
 
 function App() {
   return (
