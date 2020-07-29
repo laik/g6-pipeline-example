@@ -1,7 +1,6 @@
 import "./register-shape";
-import G6 from "@antv/g6";
 import { Graph } from "@antv/g6";
-import { GraphOptions, Item, GraphData, TreeGraphData } from '@antv/g6/lib/types';
+import { Item, GraphData } from '@antv/g6/lib/types';
 import { INode } from "@antv/g6/lib/interface/item";
 import { PipelineGraphOptions, PipelineGraphData, PipelineNodeConfig, NodeRole } from "./common";
 
@@ -27,18 +26,15 @@ export class PipelineGraph extends Graph {
       const { x, y } = model;
       const point = this.getCanvasByPoint(x, y);
 
-
       if (shape === "right-plus") {
-        const splitSource = source.split("-");
-        const [group, index] = splitSource;
-        
-        let tragetId = splitSource.join("-");
+        let [group, index] = source.split("-");
+        group = String(Number(group) + 1);
 
-        const item = this.findById(tragetId);
-        if (item) {
-          splitSource[1] = String(Number(splitSource[1]) + 1);
-          tragetId = splitSource.join("-");
+        while (this.findById([group, index].join("-")) != undefined) {
+          index = String(Number(index) + 1);
         }
+
+        const tragetId = [group, index].join("-");
 
         const NodeX = Number(point.x) + 300;
         if (this.width - NodeX < 400) {
@@ -46,17 +42,18 @@ export class PipelineGraph extends Graph {
           this.changeSize(this.width, this.height);
         }
 
-        const nodeResult = this.addItem("node", {
-          id: tragetId,
-          taskName: "none",
-          role: NodeRole.Primary,
-          x: Number(point.x) + 300,
-          y: Number(point.y),
-          anchorPoints: [
-            [0, 0.5],
-            [1, 0.5],
-          ],
-        });
+        const nodeResult = this.addItem("node",
+          {
+            id: tragetId,
+            taskName: "none",
+            role: NodeRole.Primary,
+            x: Number(point.x) + 300,
+            y: Number(point.y) + ((Number(index) - 1) * 60),
+            anchorPoints: [
+              [0, 0.5],
+              [1, 0.5],
+            ],
+          });
 
         if (nodeResult == undefined && notify != undefined) {
           notify("add node exist or error")

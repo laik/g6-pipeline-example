@@ -382,8 +382,7 @@ G6.registerNode(nodeNamed, {
           map((item) => {
             group.removeChild(item)
           })
-      }, 3000);
-      console.log("enter move out")
+      }, 5000);
     }
 
     if (name === "click") {

@@ -50,9 +50,25 @@ export interface PipelineGraphData extends GraphData {
     edges?: PipelineEdgeConfig[];
 }
 
+export function buildNodeConfig(id: string, x: number, y: number): PipelineNodeConfig {
+    const node: PipelineNodeConfig = {
+        id: id,
+        x: x,
+        y: y,
+        role: NodeRole.Second,
+        anchorPoints: [
+            [0, 0.5],
+            [1, 0.5],
+        ],
+    };
+    if (id.endsWith("1", 1)) {
+        node.role = NodeRole.Primary
+    }
+    return node;
+}
 
-const defaultInitGraphNode: PipelineNodeConfig = {
-    id: "0-0",
+export const defaultInitGraphNode: PipelineNodeConfig = {
+    id: "1-1",
     x: 20,
     y: 20,
     role: NodeRole.Primary,
