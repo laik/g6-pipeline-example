@@ -1,7 +1,7 @@
 import G6 from '@antv/g6';
 import { ModelConfig, Item } from '@antv/g6/lib/types';
 import { Group, IShape } from '@antv/g-canvas/lib';
-import { PipelineGraphConfig, NodeStatus, nodeNamed, NodeRole } from './common';
+import { PipelineGraphConfig, NodeStatus, pipelineNode, NodeRole } from './common';
 
 
 G6.registerEdge("hvh",
@@ -280,14 +280,14 @@ function drawTime(cfg: PipelineGraphConfig, group: Group) {
 
 
 function drawAddNode(group: Group) {
-  const lightColor = "lightblue";
+  const lightColor = "#ccc";
   group.addShape("circle", {
     name: "test",
     labels: "addond",
     attrs: {
       x: 192,
       y: 25,
-      r: 8,
+      r: 10.3,
       stroke: lightColor,
       fill: lightColor,
       isCollapseShape: true,
@@ -304,9 +304,9 @@ function drawAddNode(group: Group) {
       height: 20,
       textAlign: "center",
       textBaseline: "middle",
-      text: "+",
-      fontSize: 10,
-      fill: "#00000",
+      text: "🐶",
+      fontSize: 12,
+      fill: "#6666",
       cursor: "pointer",
       isCollapseShape: true,
     },
@@ -348,7 +348,7 @@ function drawSubNode(group: Group) {
 }
 
 
-G6.registerNode(nodeNamed, {
+G6.registerNode(pipelineNode, {
   drawShape: function drawShape(cfg: PipelineGraphConfig, group: Group) {
     return drawPipeline(cfg, group);
   },
@@ -375,14 +375,14 @@ G6.registerNode(nodeNamed, {
 
     if (name === "hover" && !value) {
       setTimeout(() => {
-        group.getChildren().
+        group.getChildren()?.
           filter((child) => {
             return child.get("labels") === "addond"
           }).
           map((item) => {
             group.removeChild(item)
           })
-      }, 5000);
+      }, 2500);
     }
 
     if (name === "click") {

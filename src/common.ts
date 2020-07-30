@@ -3,11 +3,7 @@ import { INode } from '@antv/g6/lib/interface/item';
 
 export const graphId = "container"
 
-export const nodeNamed: string = "pipeline-node";
-
-export const eventNames = [
-    'primary-hover'
-];
+export const pipelineNode: string = "pipeline-node";
 
 export enum NodeRole {
     Primary,
@@ -50,6 +46,25 @@ export interface PipelineGraphData extends GraphData {
     edges?: PipelineEdgeConfig[];
 }
 
+
+export function getGroupId(id: string): number {
+    if (id.split("-").length == 2) {
+        return Number(id.split("-")[0]);
+    }
+    return -1;
+}
+
+export function getIndexId(id: string): number {
+    if (id.split("-").length == 2) {
+        return Number(id.split("-")[1]);
+    }
+    return -1;
+}
+
+export function getPrimaryNodeId(id: string): string {
+    return [getGroupId(id), "1"].join("-");
+}
+
 export function buildNodeConfig(id: string, x: number, y: number): PipelineNodeConfig {
     const node: PipelineNodeConfig = {
         id: id,
@@ -86,7 +101,7 @@ export const defaultInitData: PipelineGraphData = {
 export const defaultCfg: PipelineGraphOptions = {
     container: graphId,
     width: 1200,
-    height: 300,
+    height: 800,
     renderer: "svg",
     autoPaint: true,
 
@@ -99,7 +114,7 @@ export const defaultCfg: PipelineGraphOptions = {
     },
 
     defaultNode: {
-        type: nodeNamed,
+        type: pipelineNode,
         size: [140, 60],
         linkPoints: {
             left: true,
