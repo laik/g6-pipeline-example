@@ -87,10 +87,10 @@ export const defaultInitGraphNode: PipelineNodeConfig = {
     x: 20,
     y: 20,
     role: NodeRole.Primary,
-    taskName: "none",
+    taskName: "none-1-1",
     anchorPoints: [
-        [0, 0.5],
-        [1, 0.5],
+        [0, 0.5], // 左侧中间
+        [1, 0.5], // 右侧中间
     ],
 }
 
@@ -100,34 +100,40 @@ export const defaultInitData: PipelineGraphData = {
 
 export const defaultCfg: PipelineGraphOptions = {
     container: graphId,
-    width: 1200,
-    height: 800,
-    renderer: "svg",
+    width: 2200,
+    height: 1200,
+    renderer: "canvas",
     autoPaint: true,
 
+    layout: {
+        direction: 'LR',
+        preventOverlap: true,  // 防止节点重叠
+    },
+
+    modes: {
+        default: ['drag-canvas', 'zoom-canvas', 'drag-node'], // 允许拖拽画布、放缩画布、拖拽节点
+    },
+
     defaultEdge: {
-        type: "Line",
+        // type: "cubic-horizontal",
+        // type: "cubic-vertical",
+        type: 'line',
         style: {
             stroke: "#959DA5",
-            lineWidth: 4,
+            lineWidth: 2,
         },
     },
 
     defaultNode: {
         type: pipelineNode,
-        size: [140, 60],
         linkPoints: {
-            left: true,
             right: true,
-            size: 5,
+            left: true,
         },
+        // anchorPoints: [
+        //     [1, 0.5],
+        //     [0, 0.5],
+        // ]
     },
-    nodeStateStyles: {
-        hover: {
-            fillOpacity: 0.1,
-            lineWidth: 2,
-        },
-    },
-
 };
 

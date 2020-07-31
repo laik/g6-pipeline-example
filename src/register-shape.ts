@@ -1,16 +1,17 @@
 import G6 from '@antv/g6';
-import { ModelConfig, Item } from '@antv/g6/lib/types';
+import { Item } from '@antv/g6/lib/types';
 import { Group, IShape } from '@antv/g-canvas/lib';
 import { PipelineGraphConfig, NodeStatus, pipelineNode, NodeRole } from './common';
 
 
 G6.registerEdge("hvh",
   {
-    draw(cfg, group) { return this.drawShape(cfg, group); },
-    drawShape(cfg: any, group) {
+    draw(cfg: PipelineGraphConfig, group: Group) { return this.drawShape(cfg, group); },
+
+    drawShape(cfg: PipelineGraphConfig, group: Group) {
       const startPoint = cfg.startPoint;
       const endPoint = cfg.endPoint;
-      const shape = group.addShape("path", {
+      return group.addShape("path", {
         attrs: {
           stroke: "#959DA5",
           lineWidth: 3,
@@ -21,11 +22,33 @@ G6.registerEdge("hvh",
             ["L", endPoint.x + 50, endPoint.y],
           ],
         },
-      });
-      return shape;
+      });;
     },
   }
 );
+
+G6.registerEdge('hvh2', {
+  draw(cfg: PipelineGraphConfig, group: Group) {
+    const startPoint = cfg.startPoint;
+    const endPoint = cfg.endPoint;
+    const shape = group.addShape('path', {
+      attrs: {
+        stroke: '#333',
+        path: [
+          ['M', startPoint.x, startPoint.y],
+          ['L', endPoint.x / 3 + (2 / 3) * startPoint.x, startPoint.y], // 三分之一处
+          ['L', endPoint.x / 3 + (2 / 3) * startPoint.x, endPoint.y], // 三分之二处
+          ['L', endPoint.x, endPoint.y],
+        ],
+      },
+      // must be assigned in G6 3.3 and later versions. it can be any value you want
+      name: 'path-shape',
+    });
+    return shape;
+  },
+});
+
+
 
 
 function drawPipeline(cfg: PipelineGraphConfig, group: Group): IShape {
@@ -35,41 +58,18 @@ function drawPipeline(cfg: PipelineGraphConfig, group: Group): IShape {
   return shape;
 }
 
-function drawStatus(group: Group, color: string, name: string): IShape {
-  return group.addShape("circle", {
-    attrs: {
-      x: 20,
-      y: 33,
-      r: 3.5,
-      fill: color,
-    },
-    name: name,
-  });
-}
-
 //drawBase draw base shape :4shape
 function drawBase(cfg: PipelineGraphConfig, group: Group): any {
-  group.addShape("rect", {
+  const shape = group.addShape("rect", {
     attrs: {
       x: 2,
       y: 2,
       width: 180,
-      height: 41,
-      lineWidth: 2,
-      radius: 5,
-      fill: "#777",
+      height: 42,
+      radius: 8,
+      fill: "#f1f1f9",
     },
     name: "main-box",
-    draggable: true,
-  });
-
-  group.addShape("rect", {
-    attrs: {
-      x: 0,
-      y: 0,
-      width: 179,
-      height: 40,
-    },
     draggable: true,
   });
 
@@ -84,21 +84,34 @@ function drawBase(cfg: PipelineGraphConfig, group: Group): any {
       style: {
         fontWeight: 900,
       },
-      fill: "black",
+      fill: "gray",
     },
     name: "title",
   });
 
-  return group.addShape("image", {
+  group.addShape("image", {
     attrs: {
       x: 140,
       y: 10,
       width: 25,
       height: 25,
-      img:
-        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAlCAYAAAAuqZsAAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAARMSURBVFhHvZjNbtRWFMct8QSFN6AvQHkB4AnaFyjddQtblhGrgJAqtUsqwaZQsQKEIBILEBCgixaQCERBSQhQSOZ7Mh+Zmcwc/DvJsa5v7jieqdMr/SWPfT5+Pufea3siCYzRaKQaDoeyvb0tg8FA+v2+9Ho92drakm6sTrcr3VidTiclPce12AZbfPAlBrGIafGzxh4wF8oFIhFJ/y235MZfFfnp9w9y6uKKfDfzTg79vKDimHNcwwZbfPB1AfPApcAMyKpkQFTi2VJdfvjtfQKRV/jgq9XcBfSrFxoJmAvFndEGWvLmY1MrEEo6iYhBLGISmxxZcAq2Byq+K+7wz+dlOXzmbTDRNCLW3KuaxiZHFlw0DurSvfVg8CJE7P3gFGwP1NxGMGCRIocPB4vBRZAyGXVOxYa0LxToIJS0Nc7trlYFs9XHpFz40Ch0Tu0ncpGT3LZaDS6ijCzjdrstp6dYfd+eW5KZWyUVxyGbLJGT3DC4LY20WnE55xerQcdxAuLKk5qWvd4ZqhicmxSQ3DC4VYsgbbVa8v2vq0EnXyS99aKpEFuDkczeK8mRs4uqmdsbUwGSGwar2g5Y3N+PG82gg69f7lc0KckfLLak0R1Krb2tbQQMGx8QHz9OSJubm/r4omq0M6K/13OsxLnXrbj3EgO15ehuJVwIHxAbbPHB140VEgyw2AqNKOGPl9eCxq6eLHVkrdLXKmRVaaeabbVhvFvvqa8fzxcMbjsjSnjywkrQ2NXDOBli3lyd35n0LiCavVuWbn+nhbdfNtUWYPxCMV3BAAtbh4I1m83Uq8s4GZj9dgHbvZGKwTl30ucFgwEWm2cKFjL05YOZgPjSGKhcIFNeMASLbRtR4z+CIeYUCl2bBAyWFNixKVrpqggwGFJglG+SyR+6VgQYDKlW8iPPdnHzn6a8WOsmW4SrcWDYch5f/5ovGGBJJj9L9NqzUtDY1fHzy8GNFPlgXMMGW3zwtWvjBENqu2BTe/+5FjT25W4RLqCBuUAMf+vIUq1eT2+wPAaYdHkf4sgHXC33VdMAIXLDkHok0VNK+PhtvoetKxeQMSmQidwwpB7i9tpTbzRyLYKiRU5yu23U1x4IWaKsiFerVfnmf3y1Jhc53W0ieVGEEFKba9eeHvwXkunO36Vkblm1kldrCLVqu3ONsl68+yUYqEiRg1y2RbjVUjAOOGGfbxiydA8SjtjkUKg4Z/DzjQPKRxntg5ee40hbi5xzxKJ9xLZ5NfaDlwNIfThr68vlciGrlRjEStrnQbnVYmT+qUIAJme1VpNHC6WJNmETPvgSg1h5oBj7/g3FiqHs3CnBVz5V5I/5da3Aidnl1CsTx5zjGjaVSkV98CUGsYhJ7CwoRu4/7tgArYLMERJWq1UVAAqx+5tr2FiF8CUGsWz1ZUExUmAMDA2QANyZAfLI4K4NkiogAJD9Nhjdn2IfAyKWu/rGQYmIfAXuNFIXGDKDxgAAAABJRU5ErkJggg==",
+      img: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACYAAAAlCAYAAAAuqZsAAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAARMSURBVFhHvZjNbtRWFMct8QSFN6AvQHkB4AnaFyjddQtblhGrgJAqtUsqwaZQsQKEIBILEBCgixaQCERBSQhQSOZ7Mh+Zmcwc/DvJsa5v7jieqdMr/SWPfT5+Pufea3siCYzRaKQaDoeyvb0tg8FA+v2+9Ho92drakm6sTrcr3VidTiclPce12AZbfPAlBrGIafGzxh4wF8oFIhFJ/y235MZfFfnp9w9y6uKKfDfzTg79vKDimHNcwwZbfPB1AfPApcAMyKpkQFTi2VJdfvjtfQKRV/jgq9XcBfSrFxoJmAvFndEGWvLmY1MrEEo6iYhBLGISmxxZcAq2Byq+K+7wz+dlOXzmbTDRNCLW3KuaxiZHFlw0DurSvfVg8CJE7P3gFGwP1NxGMGCRIocPB4vBRZAyGXVOxYa0LxToIJS0Nc7trlYFs9XHpFz40Ch0Tu0ncpGT3LZaDS6ijCzjdrstp6dYfd+eW5KZWyUVxyGbLJGT3DC4LY20WnE55xerQcdxAuLKk5qWvd4ZqhicmxSQ3DC4VYsgbbVa8v2vq0EnXyS99aKpEFuDkczeK8mRs4uqmdsbUwGSGwar2g5Y3N+PG82gg69f7lc0KckfLLak0R1Krb2tbQQMGx8QHz9OSJubm/r4omq0M6K/13OsxLnXrbj3EgO15ehuJVwIHxAbbPHB140VEgyw2AqNKOGPl9eCxq6eLHVkrdLXKmRVaaeabbVhvFvvqa8fzxcMbjsjSnjywkrQ2NXDOBli3lyd35n0LiCavVuWbn+nhbdfNtUWYPxCMV3BAAtbh4I1m83Uq8s4GZj9dgHbvZGKwTl30ucFgwEWm2cKFjL05YOZgPjSGKhcIFNeMASLbRtR4z+CIeYUCl2bBAyWFNixKVrpqggwGFJglG+SyR+6VgQYDKlW8iPPdnHzn6a8WOsmW4SrcWDYch5f/5ovGGBJJj9L9NqzUtDY1fHzy8GNFPlgXMMGW3zwtWvjBENqu2BTe/+5FjT25W4RLqCBuUAMf+vIUq1eT2+wPAaYdHkf4sgHXC33VdMAIXLDkHok0VNK+PhtvoetKxeQMSmQidwwpB7i9tpTbzRyLYKiRU5yu23U1x4IWaKsiFerVfnmf3y1Jhc53W0ieVGEEFKba9eeHvwXkunO36Vkblm1kldrCLVqu3ONsl68+yUYqEiRg1y2RbjVUjAOOGGfbxiydA8SjtjkUKg4Z/DzjQPKRxntg5ee40hbi5xzxKJ9xLZ5NfaDlwNIfThr68vlciGrlRjEStrnQbnVYmT+qUIAJme1VpNHC6WJNmETPvgSg1h5oBj7/g3FiqHs3CnBVz5V5I/5da3Aidnl1CsTx5zjGjaVSkV98CUGsYhJ7CwoRu4/7tgArYLMERJWq1UVAAqx+5tr2FiF8CUGsWz1ZUExUmAMDA2QANyZAfLI4K4NkiogAJD9Nhjdn2IfAyKWu/rGQYmIfAXuNFIXGDKDxgAAAABJRU5ErkJggg==",
     },
     name: "image-shape",
+  });
+
+  return shape;
+}
+
+function drawStatus(group: Group, color: string, name: string): IShape {
+  return group.addShape("circle", {
+    attrs: {
+      x: 20,
+      y: 33,
+      r: 3.5,
+      fill: color,
+    },
+    name: name,
   });
 }
 
@@ -280,16 +293,16 @@ function drawTime(cfg: PipelineGraphConfig, group: Group) {
 
 
 function drawAddNode(group: Group) {
-  const lightColor = "#ccc";
+  const color = "#bbfdec";
   group.addShape("circle", {
     name: "test",
     labels: "addond",
     attrs: {
-      x: 192,
-      y: 25,
+      x: 192.5,
+      y: 23,
       r: 10.3,
-      stroke: lightColor,
-      fill: lightColor,
+      stroke: color,
+      fill: color,
       isCollapseShape: true,
     },
   });
@@ -298,15 +311,14 @@ function drawAddNode(group: Group) {
     name: "right-plus",
     labels: "addond",
     attrs: {
-      x: 192,
-      y: 25,
+      x: 192.5,
+      y: 23,
       width: 20,
       height: 20,
       textAlign: "center",
       textBaseline: "middle",
-      text: "🐶",
-      fontSize: 12,
-      fill: "#6666",
+      text: "✚",
+      fill: "#51863d",
       cursor: "pointer",
       isCollapseShape: true,
     },
@@ -315,16 +327,16 @@ function drawAddNode(group: Group) {
 
 
 function drawSubNode(group: Group) {
-  const lightColor = "lightblue";
+  const color = "#f1978b";
   group.addShape("circle", {
     name: "left-circle",
     labels: "addond",
     attrs: {
-      x: -8,
-      y: 25,
-      r: 8,
-      stroke: lightColor,
-      fill: lightColor,
+      x: -9.1,
+      y: 23,
+      r: 10.3,
+      stroke: color,
+      fill: color,
       isCollapseShape: true,
     },
   });
@@ -332,15 +344,14 @@ function drawSubNode(group: Group) {
     name: "left-plus",
     labels: "addond",
     attrs: {
-      x: -8,
-      y: 25,
-      width: 16,
-      height: 16,
+      x: -9.1,
+      y: 23,
+      width: 20,
+      height: 20,
       textAlign: "center",
       textBaseline: "middle",
-      text: "-",
-      fontSize: 10,
-      fill: "#00000",
+      text: "✂︎",
+      fill: "#51863d",
       cursor: "pointer",
       isCollapseShape: true,
     },
@@ -365,12 +376,13 @@ G6.registerNode(pipelineNode, {
 
     if (name === "hover" && value && item.getModel().role === NodeRole.Primary) {
       drawAddNode(group)
-      drawSubNode(group)
-      console.log("enter move in")
+      if (item.getID() != "1-1") {
+        drawSubNode(group)
+      }
     }
 
     if (name === "hover" && value && item.getModel().role === NodeRole.Second) {
-      drawSubNode(group) 
+      drawSubNode(group)
     }
 
     if (name === "hover" && !value) {
@@ -382,7 +394,7 @@ G6.registerNode(pipelineNode, {
           map((item) => {
             group.removeChild(item)
           })
-      }, 2500);
+      }, 400);
     }
 
     if (name === "click") {
@@ -429,6 +441,7 @@ G6.registerNode(pipelineNode, {
         fontStyle: "",
       });
     }
+
     if (name === "Failed") {
       const shapeImg = group.get("children")[4];
       const shapeText = group.get("children")[5];
@@ -469,6 +482,5 @@ G6.registerNode(pipelineNode, {
     }
   },
 },
-
-  "single-node"
+  "rect"
 );

@@ -1,8 +1,16 @@
 import "./register-shape";
 import { Graph } from "@antv/g6";
-import { Item, GraphData } from '@antv/g6/lib/types';
+import { Item, GraphData, IAlgorithmCallbacks } from '@antv/g6/lib/types';
 import { INode, IEdge } from "@antv/g6/lib/interface/item";
 import { PipelineGraphOptions, PipelineGraphData, PipelineNodeConfig, NodeRole, getGroupId, getIndexId, getPrimaryNodeId } from "./common";
+import { Algorithm } from '@antv/g6'
+import { IGraph } from "@antv/g6/lib/interface/graph";
+
+
+const { depthFirstSearch, breadthFirstSearch } = Algorithm;
+
+declare type SearchAlgorithm0 = (graph: IGraph) => void;
+declare type SearchAlgorithm1 = (graph: IGraph, startNodeId: string, originalCallbacks?: IAlgorithmCallbacks) => void;
 
 
 export class PipelineGraph extends Graph {
@@ -13,6 +21,17 @@ export class PipelineGraph extends Graph {
     super(cfg);
     this.width = width;
     this.height = height;
+  }
+
+  private searchChildMove(id: string, search: SearchAlgorithm0 | SearchAlgorithm1) {
+    search(this, id, {
+      enter: ({ current, previous }) => {
+        console.log("current==>", current, "previous=>", previous);
+      },
+      leave: ({ current, previous }) => {
+        // 遍历完节点的回调
+      },
+    })
   }
 
   bindClickOnNode(cb: (node: Item) => void): void {
@@ -49,25 +68,37 @@ export class PipelineGraph extends Graph {
   }
 
   private addNode(sourceId: string, targetId: string, x: number, y: number) {
+    const sourceGroupId = getGroupId(sourceId)
     const indexId = getIndexId(targetId);
     const pipelineNodeConfig: PipelineNodeConfig = {
       id: targetId,
-      taskName: "none",
+      taskName: ["none", targetId].join("-"),
       role: indexId > 1 ? NodeRole.Second : NodeRole.Primary,
       x: Number(x) + 300,
       y: Number(y) + ((indexId - 1) * 60),
+      linkPoints: {
+        right: true,
+        left: true,
+      },
     }
     this.addItem("node", pipelineNodeConfig)
 
 
     if (indexId > 1) {
-      this.getNodes().
-        find((node: INode) => {
+      this.getNodes()
+        .find((node: INode) => {
           return node.getID() == getPrimaryNodeId(targetId)
-        }).
-        getNeighbors().
-        map((pnode: INode) => {
-          this.addItem("edge", { source: targetId, target: pnode.getID() });
+        })
+        .getNeighbors()
+        .map((pnode: INode) => {
+          this.addItem("edge", {
+            source: targetId, target: pnode.getID(),
+            type: "cubic-horizontal",
+            style: {
+              stroke: "#959DA5",
+              lineWidth: 2,
+            },
+          });
         });
     } else {
       this.getNodes()
@@ -93,17 +124,14 @@ export class PipelineGraph extends Graph {
   }
 
   private moveNode(node: INode) {
-    // 如果有子节点,那么需要将子节点上移
-    let modelConfig = node.getModel();
-    modelConfig.x -= 60;
-    this.updateItem(node, modelConfig);
-
+    // TODO
+    // 如果有子节点,那么需要将子节点上移, 有点问题,需要全部shape一起移....
+    // 用重命名的方式解决,替换taskname与id
     this.getNodes().
       map((_node: INode) => {
         if (getGroupId(_node.getID()) == getGroupId(node.getID()) && getIndexId(_node.getID()) > getIndexId(node.getID())) {
           console.log("move node", _node.getID())
-          let nodeConfig = _node.getModel();
-          nodeConfig.y = nodeConfig.y - 60;
+          let nodeConfig = _node.getModel()
           this.updateItem(_node, nodeConfig);
         }
       }
@@ -122,6 +150,7 @@ export class PipelineGraph extends Graph {
 
   bindMouseenter(): void {
     this.on("node:mouseenter", (evt: { item: Item }) => {
+      this.searchChildMove((<INode>evt.item).getID(), depthFirstSearch);
       this.setItemState(evt.item, "hover", true);
     });
   }
