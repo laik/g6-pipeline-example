@@ -1,7 +1,8 @@
 import G6 from '@antv/g6';
 import { Item } from '@antv/g6/lib/types';
 import { Group, IShape } from '@antv/g-canvas/lib';
-import { PipelineGraphConfig, NodeStatus, pipelineNode, NodeRole } from './common';
+import { PipelineGraphConfig, NodeStatus, pipelineNode, NodeRole, hasRightNeighborNode, hasSubNode } from './common';
+import { INode } from '@antv/g6/lib/interface/item';
 
 
 G6.registerEdge("hvh",
@@ -376,15 +377,28 @@ G6.registerNode(pipelineNode, {
 
     if (name === "hover" && value && item.getModel().role === NodeRole.Primary) {
       setTimeout(() => {
-        drawAddNode(group)
-        if (item.getID() != "1-1") {
-          drawSubNode(group)
+        drawAddNode(group);
+
+        if (item.getID() == "1-1") {
+          return;
         }
+
+        if (hasRightNeighborNode(<INode>item)) {
+          return;
+        }
+
+        if (hasSubNode(<INode>item)) {
+          return;
+        }
+
+        drawSubNode(group);
       }, 100);
     }
 
     if (name === "hover" && value && item.getModel().role === NodeRole.Second) {
-      drawSubNode(group)
+      setTimeout(() => {
+        drawSubNode(group)
+      }, 100);
     }
 
     if (name === "hover" && !value) {

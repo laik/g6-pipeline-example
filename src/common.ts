@@ -1,10 +1,9 @@
 import { GraphOptions, GraphData, NodeConfig, ModelConfig, Item, TreeGraphData, EdgeConfig } from '@antv/g6/lib/types';
 import { INode } from '@antv/g6/lib/interface/item';
+import { IGraph } from '@antv/g6/lib/interface/graph';
 
 export const graphId = "container"
-
 export const pipelineNode: string = "pipeline-node";
-
 export const spacingY = 60;
 export const spacingX = 300;
 
@@ -23,13 +22,9 @@ export enum NodeStatus {
     Timeout,
 }
 
-export interface PipelineGraphOptions extends GraphOptions {
+export interface PipelineGraphOptions extends GraphOptions { }
 
-}
-
-export interface PipelineGraphConfig extends ModelConfig {
-
-}
+export interface PipelineGraphConfig extends ModelConfig { }
 
 export interface PipelineNodeConfig extends NodeConfig {
     role?: NodeRole,
@@ -40,9 +35,7 @@ export interface PipelineNodeConfig extends NodeConfig {
     subnode?: boolean,
 }
 
-export interface PipelineEdgeConfig extends EdgeConfig {
-
-}
+export interface PipelineEdgeConfig extends EdgeConfig { }
 
 export interface PipelineGraphData extends GraphData {
     nodes?: PipelineNodeConfig[];
@@ -66,6 +59,73 @@ export function getIndexId(id: string): number {
 
 export function getPrimaryNodeId(id: string): string {
     return [getGroupId(id), "1"].join("-");
+}
+
+
+export function hasRightNeighborNode(node: INode): boolean {
+    return node.getNeighbors().find((item: INode) => {
+        if (getGroupId(item.getID()) == (getGroupId(node.getID()) + 1)) {
+            return item;
+        }
+    }) != undefined ? true : false;
+}
+
+export function hasSubNode(node: INode): boolean {
+    return node.getNeighbors().find((item: INode) => {
+        if (getGroupId(node.getID()) == (getGroupId(item.getID()) + 1)) {
+            return item;
+        }
+    })?.getNeighbors().find((groupItem: INode) => {
+        if (getGroupId(node.getID()) == getGroupId(groupItem.getID()) && node.getID() != groupItem.getID()) {
+            return groupItem;
+        }
+    }) != undefined ? true : false;
+}
+
+
+export function groupNodes(node: INode): INode[] {
+    return node.getNeighbors()
+        ?.find((item: INode) => {
+            if (getGroupId(node.getID()) == (getGroupId(item.getID()) + 1)) {
+                return item;
+            }
+        })
+        ?.getNeighbors()
+        ?.filter((groupItem: INode) => {
+            return getGroupId(node.getID()) == getGroupId(groupItem.getID());
+        })
+        ?.sort((a: INode, b: INode): number => {
+            if (a.getID() > b.getID()) {
+                return 1;
+            }
+            if (a.getID() < b.getID()) {
+                return -1;
+            }
+            return 0;
+        }) || [];
+}
+
+export function subNodes(node: INode): INode[] {
+    if (!hasSubNode(node)) { return []; }
+    return node.getNeighbors()
+        ?.find((item: INode) => {
+            if (getGroupId(node.getID()) == (getGroupId(item.getID()) + 1)) {
+                return item;
+            }
+        })
+        ?.getNeighbors()
+        ?.filter((groupItem: INode) => {
+            return getGroupId(node.getID()) == getGroupId(groupItem.getID()) && node.getID() != groupItem.getID()
+        })
+        ?.sort((a: INode, b: INode): number => {
+            if (a.getID() > b.getID()) {
+                return 1;
+            }
+            if (a.getID() < b.getID()) {
+                return -1;
+            }
+            return 0;
+        }) || [];
 }
 
 export function buildNodeConfig(id: string, x: number, y: number): PipelineNodeConfig {
@@ -118,8 +178,6 @@ export const defaultCfg: PipelineGraphOptions = {
     },
 
     defaultEdge: {
-        // type: "cubic-horizontal",
-        // type: "cubic-vertical",
         type: 'line',
         style: {
             stroke: "#959DA5",
@@ -133,10 +191,6 @@ export const defaultCfg: PipelineGraphOptions = {
             right: true,
             left: true,
         },
-        // anchorPoints: [
-        //     [1, 0.5],
-        //     [0, 0.5],
-        // ]
     },
 };
 

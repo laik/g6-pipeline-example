@@ -2,7 +2,7 @@ import "./register-shape";
 import { Graph } from "@antv/g6";
 import { Item, GraphData, IAlgorithmCallbacks } from '@antv/g6/lib/types';
 import { INode, IEdge } from "@antv/g6/lib/interface/item";
-import { PipelineGraphOptions, PipelineGraphData, PipelineNodeConfig, NodeRole, getGroupId, getIndexId, getPrimaryNodeId, spacingY, spacingX } from "./common";
+import { PipelineGraphOptions, PipelineGraphData, PipelineNodeConfig, NodeRole, getGroupId, getIndexId, getPrimaryNodeId, spacingY, spacingX, subNodes, hasSubNode, groupNodes } from "./common";
 import { Algorithm } from '@antv/g6'
 import { IGraph } from "@antv/g6/lib/interface/graph";
 
@@ -46,20 +46,23 @@ export class PipelineGraph extends Graph {
       const point = this.getCanvasByPoint(x, y);
 
       if (shape === "right-plus") {
-        let [group, index] = sourceId.split("-");
-        group = String(Number(group) + 1);
+        const [group, index] = sourceId.split("-");
+        const nextGroup = String(Number(group) + 1);
+        let targetId = [nextGroup, index].join("-");
+        let nodeLayoutIndex: number = 0;
 
-        while (this.findById([group, index].join("-")) != undefined) {
-          index = String(Number(index) + 1);
+        if (this.findById(targetId) != undefined) {
+          const groupNodeSortList = groupNodes(<INode>this.findById(targetId))
+          targetId = [nextGroup, String(getIndexId(groupNodeSortList[groupNodeSortList.length - 1].getID()) + 1)].join("-");
+          nodeLayoutIndex = groupNodeSortList.length;
         }
-        const targetId = [group, index].join("-");
-        this.addNode(sourceId, targetId, Number(point.x), Number(point.y));
+        
+        this.addNode(sourceId, targetId, Number(point.x), Number(point.y), nodeLayoutIndex);
       }
 
       if (shape === "left-plus") {
         const source = (<INode>item);
         this.moveNode(node);
-        // this.removeEdge(node);
         this.removeItem(source.getID());
       }
 
@@ -67,23 +70,25 @@ export class PipelineGraph extends Graph {
     });
   }
 
-  private addNode(sourceId: string, targetId: string, x: number, y: number) {
-    const sourceGroupId = getGroupId(sourceId)
-    const indexId = getIndexId(targetId);
+  private addNode(sourceId: string, targetId: string, x: number, y: number, nodeLayoutIndex: number) {
+    const nodeIndexId = getIndexId(targetId);
     const pipelineNodeConfig: PipelineNodeConfig = {
       id: targetId,
       taskName: ["none", targetId].join("-"),
-      role: indexId > 1 ? NodeRole.Second : NodeRole.Primary,
+      role: nodeIndexId > 1 ? NodeRole.Second : NodeRole.Primary,
       x: Number(x) + spacingX,
-      y: Number(y) + ((indexId - 1) * spacingY),
+      y: Number(y) + (nodeLayoutIndex * spacingY),
       linkPoints: {
         right: true,
         left: true,
       },
     }
-    this.addItem("node", pipelineNodeConfig)
 
-    if (indexId > 1) {
+    if (this.addItem("node", pipelineNodeConfig) == undefined) {
+      return
+    }
+
+    if (nodeIndexId > 1) {
       this.getNodes()
         .find((node: INode) => {
           return node.getID() == getPrimaryNodeId(targetId)
@@ -120,18 +125,6 @@ export class PipelineGraph extends Graph {
     }
   }
 
-  private removePrimaryNode(node: INode) {
-
-  }
-
-  private removeEdge(node: INode) {
-    // console.log("neighbors node", node.getNeighbors())
-    // 2 如果节点有左右邻居,应该左右邻居握手
-    node.getEdges().map((edge: IEdge) => {
-      console.log("remove edge", edge.getModel());
-      this.removeItem(edge.getID())
-    })
-  }
 
   private moveNode(node: INode) {
     // TODO
