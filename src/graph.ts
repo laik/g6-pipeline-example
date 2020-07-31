@@ -71,7 +71,7 @@ export class PipelineGraph extends Graph {
   }
 
   private removeNode(node: INode) {
-    if (hasRightNeighborNode(node)) {
+    if (hasRightNeighborNode(node) && getIndexId(node.getID()) == 1) {
       alert("Illegal operation");
       return;
     }
