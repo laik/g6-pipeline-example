@@ -56,7 +56,7 @@ export class PipelineGraph extends Graph {
           targetId = [nextGroup, String(getIndexId(groupNodeSortList[groupNodeSortList.length - 1].getID()) + 1)].join("-");
           nodeLayoutIndex = groupNodeSortList.length;
         }
-        
+
         this.addNode(sourceId, targetId, Number(point.x), Number(point.y), nodeLayoutIndex);
       }
 
@@ -74,7 +74,7 @@ export class PipelineGraph extends Graph {
     const nodeIndexId = getIndexId(targetId);
     const pipelineNodeConfig: PipelineNodeConfig = {
       id: targetId,
-      taskName: ["none", targetId].join("-"),
+      taskName: ["node", targetId].join("-"),
       role: nodeIndexId > 1 ? NodeRole.Second : NodeRole.Primary,
       x: Number(x) + spacingX,
       y: Number(y) + (nodeLayoutIndex * spacingY),
@@ -90,11 +90,11 @@ export class PipelineGraph extends Graph {
 
     if (nodeIndexId > 1) {
       this.getNodes()
-        .find((node: INode) => {
+        ?.find((node: INode) => {
           return node.getID() == getPrimaryNodeId(targetId)
         })
-        .getNeighbors()
-        .map((pnode: INode) => {
+        ?.getNeighbors()
+        ?.map((pnode: INode) => {
           if (getIndexId(pnode.getID()) == 1) {
             this.addItem("edge", {
               source: targetId,
@@ -109,17 +109,18 @@ export class PipelineGraph extends Graph {
         });
     } else {
       this.getNodes()
-        .map((node: INode) => {
+        ?.map((node: INode) => {
           if (getGroupId(node.getID()) == (getGroupId(targetId) - 1)) {
-            this.addItem("edge", {
-              source: node.getID(),
-              target: targetId,
-              type: "cubic-horizontal",
-              style: {
-                stroke: "#959DA5",
-                lineWidth: 2,
-              },
-            });
+            this.addItem("edge",
+              {
+                source: node.getID(),
+                target: targetId,
+                type: "cubic-horizontal",
+                style: {
+                  stroke: "#959DA5",
+                  lineWidth: 2,
+                },
+              });
           }
         })
     }
@@ -127,22 +128,43 @@ export class PipelineGraph extends Graph {
 
 
   private moveNode(node: INode) {
-    // TODO
     // 如果有子节点,那么需要将子节点上移, 有点问题,需要全部shape一起移.... ?
-    this.getNodes().
-      map((_node: INode) => {
-        if (getGroupId(_node.getID()) == getGroupId(node.getID()) && getIndexId(_node.getID()) > getIndexId(node.getID())) {
-          console.log("move node", _node.getID())
-          _node.updatePosition({ x: _node.getModel().x, y: _node.getModel().y - spacingY });
-          _node.getEdges()?.map((edge: IEdge) => {
-            const model = edge.getModel();
-            this.removeItem(edge);
-            this.addItem("edge", model);
-            console.log('remove and add edge', model.source);
+    if (!hasSubNode(node)) {
+      return;
+    }
+
+    this.getNodes()
+      ?.map((needUpdateNode: INode) => {
+        if (getGroupId(needUpdateNode.getID()) == getGroupId(node.getID()) && getIndexId(needUpdateNode.getID()) > getIndexId(node.getID())) {
+          console.log("move node", needUpdateNode.getID());
+
+          needUpdateNode.updatePosition({
+            x: needUpdateNode.getModel().x,
+            y: needUpdateNode.getModel().y - spacingY,
           });
+
+          const needUpdateEdgeCfg = needUpdateNode.getEdges()
+            ?.map((edge: IEdge) => {
+              return { id: edge.getID(), source: edge.getModel().source, target: edge.getModel().target };
+            });
+
+          if (needUpdateEdgeCfg == undefined || needUpdateEdgeCfg.length == 0) {
+            return
+          }
+          needUpdateEdgeCfg.map((cfg: { id: string, source: string, target: string }) => {
+            this.remove(cfg.id);
+            this.addItem("edge", {
+              source: cfg.source,
+              target: cfg.target,
+              type: "cubic-horizontal",
+              style: {
+                stroke: "#959DA5",
+                lineWidth: 2,
+              },
+            });
+          })
         }
-      }
-      );
+      });
   }
 
   setTaskName(node: Item, taskName: string): void {

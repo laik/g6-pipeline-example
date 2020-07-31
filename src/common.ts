@@ -71,15 +71,17 @@ export function hasRightNeighborNode(node: INode): boolean {
 }
 
 export function hasSubNode(node: INode): boolean {
-    return node.getNeighbors().find((item: INode) => {
-        if (getGroupId(node.getID()) == (getGroupId(item.getID()) + 1)) {
-            return item;
-        }
-    })?.getNeighbors().find((groupItem: INode) => {
-        if (getGroupId(node.getID()) == getGroupId(groupItem.getID()) && node.getID() != groupItem.getID()) {
-            return groupItem;
-        }
-    }) != undefined ? true : false;
+    return node.getNeighbors()
+        ?.find((item: INode) => {
+            if (getGroupId(node.getID()) == (getGroupId(item.getID()) + 1)) {
+                return item;
+            }
+        })
+        ?.getNeighbors().find((groupItem: INode) => {
+            if (getGroupId(node.getID()) == getGroupId(groupItem.getID()) && node.getID() != groupItem.getID()) {
+                return groupItem;
+            }
+        }) != undefined ? true : false;
 }
 
 
@@ -150,7 +152,7 @@ export const defaultInitGraphNode: PipelineNodeConfig = {
     x: 20,
     y: 20,
     role: NodeRole.Primary,
-    taskName: "none-1-1",
+    taskName: "node-1-1",
     anchorPoints: [
         [0, 0.5], // 左侧中间
         [1, 0.5], // 右侧中间

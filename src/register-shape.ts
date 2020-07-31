@@ -5,53 +5,6 @@ import { PipelineGraphConfig, NodeStatus, pipelineNode, NodeRole, hasRightNeighb
 import { INode } from '@antv/g6/lib/interface/item';
 
 
-G6.registerEdge("hvh",
-  {
-    draw(cfg: PipelineGraphConfig, group: Group) { return this.drawShape(cfg, group); },
-
-    drawShape(cfg: PipelineGraphConfig, group: Group) {
-      const startPoint = cfg.startPoint;
-      const endPoint = cfg.endPoint;
-      return group.addShape("path", {
-        attrs: {
-          stroke: "#959DA5",
-          lineWidth: 3,
-          path: [
-            ["M", startPoint.x, startPoint.y],
-            ["L", endPoint.x / 3 + (2 / 3) * startPoint.x + 50, startPoint.y],
-            ["L", endPoint.x / 3 + (2 / 3) * startPoint.x + 50, endPoint.y],
-            ["L", endPoint.x + 50, endPoint.y],
-          ],
-        },
-      });;
-    },
-  }
-);
-
-G6.registerEdge('hvh2', {
-  draw(cfg: PipelineGraphConfig, group: Group) {
-    const startPoint = cfg.startPoint;
-    const endPoint = cfg.endPoint;
-    const shape = group.addShape('path', {
-      attrs: {
-        stroke: '#333',
-        path: [
-          ['M', startPoint.x, startPoint.y],
-          ['L', endPoint.x / 3 + (2 / 3) * startPoint.x, startPoint.y], // 三分之一处
-          ['L', endPoint.x / 3 + (2 / 3) * startPoint.x, endPoint.y], // 三分之二处
-          ['L', endPoint.x, endPoint.y],
-        ],
-      },
-      // must be assigned in G6 3.3 and later versions. it can be any value you want
-      name: 'path-shape',
-    });
-    return shape;
-  },
-});
-
-
-
-
 function drawPipeline(cfg: PipelineGraphConfig, group: Group): IShape {
   const shape = drawBase(cfg, group);
   drawNodeStatus(cfg, group);
