@@ -369,16 +369,18 @@ G6.registerNode(pipelineNode, {
     const group = item.getContainer();
 
     if (name === "time" && value) {
-      group.getChildren().
-        find(child => { return child.get("labels") == "time" }).
-        attr({ text: value });
+      group.getChildren()
+        .find(child => { return child.get("labels") == "time" })
+        .attr({ text: value });
     }
 
     if (name === "hover" && value && item.getModel().role === NodeRole.Primary) {
-      drawAddNode(group)
-      if (item.getID() != "1-1") {
-        drawSubNode(group)
-      }
+      setTimeout(() => {
+        drawAddNode(group)
+        if (item.getID() != "1-1") {
+          drawSubNode(group)
+        }
+      }, 100);
     }
 
     if (name === "hover" && value && item.getModel().role === NodeRole.Second) {
@@ -394,7 +396,7 @@ G6.registerNode(pipelineNode, {
           map((item) => {
             group.removeChild(item)
           })
-      }, 400);
+      }, 300);
     }
 
     if (name === "click") {

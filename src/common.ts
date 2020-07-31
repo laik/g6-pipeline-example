@@ -5,6 +5,9 @@ export const graphId = "container"
 
 export const pipelineNode: string = "pipeline-node";
 
+export const spacingY = 60;
+export const spacingX = 300;
+
 export enum NodeRole {
     Primary,
     Second,

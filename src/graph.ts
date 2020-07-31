@@ -2,7 +2,7 @@ import "./register-shape";
 import { Graph } from "@antv/g6";
 import { Item, GraphData, IAlgorithmCallbacks } from '@antv/g6/lib/types';
 import { INode, IEdge } from "@antv/g6/lib/interface/item";
-import { PipelineGraphOptions, PipelineGraphData, PipelineNodeConfig, NodeRole, getGroupId, getIndexId, getPrimaryNodeId } from "./common";
+import { PipelineGraphOptions, PipelineGraphData, PipelineNodeConfig, NodeRole, getGroupId, getIndexId, getPrimaryNodeId, spacingY, spacingX } from "./common";
 import { Algorithm } from '@antv/g6'
 import { IGraph } from "@antv/g6/lib/interface/graph";
 
@@ -59,7 +59,7 @@ export class PipelineGraph extends Graph {
       if (shape === "left-plus") {
         const source = (<INode>item);
         this.moveNode(node);
-        this.removeEdge(node);
+        // this.removeEdge(node);
         this.removeItem(source.getID());
       }
 
@@ -74,15 +74,14 @@ export class PipelineGraph extends Graph {
       id: targetId,
       taskName: ["none", targetId].join("-"),
       role: indexId > 1 ? NodeRole.Second : NodeRole.Primary,
-      x: Number(x) + 300,
-      y: Number(y) + ((indexId - 1) * 60),
+      x: Number(x) + spacingX,
+      y: Number(y) + ((indexId - 1) * spacingY),
       linkPoints: {
         right: true,
         left: true,
       },
     }
     this.addItem("node", pipelineNodeConfig)
-
 
     if (indexId > 1) {
       this.getNodes()
@@ -91,20 +90,31 @@ export class PipelineGraph extends Graph {
         })
         .getNeighbors()
         .map((pnode: INode) => {
-          this.addItem("edge", {
-            source: targetId, target: pnode.getID(),
-            type: "cubic-horizontal",
-            style: {
-              stroke: "#959DA5",
-              lineWidth: 2,
-            },
-          });
+          if (getIndexId(pnode.getID()) == 1) {
+            this.addItem("edge", {
+              source: targetId,
+              target: pnode.getID(),
+              type: "cubic-horizontal",
+              style: {
+                stroke: "#959DA5",
+                lineWidth: 2,
+              },
+            });
+          }
         });
     } else {
       this.getNodes()
         .map((node: INode) => {
           if (getGroupId(node.getID()) == (getGroupId(targetId) - 1)) {
-            this.addItem("edge", { source: targetId, target: node.getID() });
+            this.addItem("edge", {
+              source: node.getID(),
+              target: targetId,
+              type: "cubic-horizontal",
+              style: {
+                stroke: "#959DA5",
+                lineWidth: 2,
+              },
+            });
           }
         })
     }
@@ -125,14 +135,18 @@ export class PipelineGraph extends Graph {
 
   private moveNode(node: INode) {
     // TODO
-    // 如果有子节点,那么需要将子节点上移, 有点问题,需要全部shape一起移....
-    // 用重命名的方式解决,替换taskname与id
+    // 如果有子节点,那么需要将子节点上移, 有点问题,需要全部shape一起移.... ?
     this.getNodes().
       map((_node: INode) => {
         if (getGroupId(_node.getID()) == getGroupId(node.getID()) && getIndexId(_node.getID()) > getIndexId(node.getID())) {
           console.log("move node", _node.getID())
-          let nodeConfig = _node.getModel()
-          this.updateItem(_node, nodeConfig);
+          _node.updatePosition({ x: _node.getModel().x, y: _node.getModel().y - spacingY });
+          _node.getEdges()?.map((edge: IEdge) => {
+            const model = edge.getModel();
+            this.removeItem(edge);
+            this.addItem("edge", model);
+            console.log('remove and add edge', model.source);
+          });
         }
       }
       );
