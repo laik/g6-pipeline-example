@@ -2,7 +2,7 @@ import "./register-shape";
 import { Graph } from "@antv/g6";
 import { Item, GraphData, IAlgorithmCallbacks } from '@antv/g6/lib/types';
 import { INode, IEdge } from "@antv/g6/lib/interface/item";
-import { PipelineGraphOptions, PipelineGraphData, PipelineNodeConfig, NodeRole, getGroupId, getIndexId, getPrimaryNodeId, spacingY, spacingX, subNodes, hasSubNode, groupNodes } from "./common";
+import { PipelineGraphOptions, PipelineGraphData, PipelineNodeConfig, NodeRole, getGroupId, getIndexId, getPrimaryNodeId, spacingY, spacingX, subNodes, hasSubNode, groupNodes, hasRightNeighborNode } from "./common";
 import { Algorithm } from '@antv/g6'
 import { IGraph } from "@antv/g6/lib/interface/graph";
 
@@ -63,11 +63,19 @@ export class PipelineGraph extends Graph {
       if (shape === "left-plus") {
         const source = (<INode>item);
         this.moveNode(node);
-        this.removeItem(source.getID());
+        this.removeNode(source);
       }
 
       if (cb) { cb(item) };
     });
+  }
+
+  private removeNode(node: INode) {
+    if (hasRightNeighborNode(node)) {
+      alert("Illegal operation");
+      return;
+    }
+    this.removeItem(node.getID());
   }
 
   private addNode(sourceId: string, targetId: string, x: number, y: number, nodeLayoutIndex: number) {
