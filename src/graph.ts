@@ -124,6 +124,8 @@ export class PipelineGraph extends Graph {
                 source: node.getID(),
                 target: targetId,
                 type: "cubic-horizontal",
+                // curvePosition: 1,
+                curveOffset: 20,
                 style: {
                   stroke: "#959DA5",
                   lineWidth: 2,
