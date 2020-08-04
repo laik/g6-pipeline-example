@@ -450,6 +450,5 @@ G6.registerNode(pipelineNode, {
       });
     }
   },
-},
-  "rect"
+}
 );

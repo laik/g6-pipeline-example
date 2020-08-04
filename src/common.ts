@@ -176,7 +176,7 @@ export const defaultCfg: PipelineGraphOptions = {
     },
 
     modes: {
-        default: ['drag-canvas', 'zoom-canvas', 'drag-node'], // 允许拖拽画布、放缩画布、拖拽节点
+        // default: ['drag-canvas', 'zoom-canvas', 'drag-node'], // 允许拖拽画布、放缩画布、拖拽节点
     },
 
     defaultEdge: {

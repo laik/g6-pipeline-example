@@ -78,6 +78,31 @@ export class PipelineGraph extends Graph {
     this.removeItem(node.getID());
   }
 
+  private addCubicEdge(targetId: string, sourceId: string) {
+    this.addItem("edge", {
+      source: targetId,
+      target: sourceId,
+      type: "cubic-horizontal",
+      style: {
+        stroke: "#959DA5",
+        lineWidth: 2,
+      },
+    });
+  }
+
+  private addLineEdge(targetId: string, sourceId: string) {
+    this.addItem("edge",
+      {
+        source: sourceId,
+        target: targetId,
+        type: "cubic-horizontal",
+        style: {
+          stroke: "#959DA5",
+          lineWidth: 2,
+        },
+      });
+  }
+
   private addNode(sourceId: string, targetId: string, x: number, y: number, nodeLayoutIndex: number) {
     const nodeIndexId = getIndexId(targetId);
     const pipelineNodeConfig: PipelineNodeConfig = {
@@ -86,6 +111,10 @@ export class PipelineGraph extends Graph {
       role: nodeIndexId > 1 ? NodeRole.Second : NodeRole.Primary,
       x: Number(x) + spacingX,
       y: Number(y) + (nodeLayoutIndex * spacingY),
+      anchorPoints: [
+        [0, 0.5], // 左侧中间
+        [1, 0.5], // 右侧中间
+      ],
       linkPoints: {
         right: true,
         left: true,
@@ -104,33 +133,14 @@ export class PipelineGraph extends Graph {
         ?.getNeighbors()
         ?.map((pnode: INode) => {
           if (getIndexId(pnode.getID()) == 1) {
-            this.addItem("edge", {
-              source: targetId,
-              target: pnode.getID(),
-              type: "cubic-horizontal",
-              style: {
-                stroke: "#959DA5",
-                lineWidth: 2,
-              },
-            });
+            this.addCubicEdge(targetId, sourceId);
           }
         });
     } else {
       this.getNodes()
         ?.map((node: INode) => {
           if (getGroupId(node.getID()) == (getGroupId(targetId) - 1)) {
-            this.addItem("edge",
-              {
-                source: node.getID(),
-                target: targetId,
-                type: "cubic-horizontal",
-                // curvePosition: 1,
-                curveOffset: 20,
-                style: {
-                  stroke: "#959DA5",
-                  lineWidth: 2,
-                },
-              });
+            this.addCubicEdge(targetId, node.getID());
           }
         })
     }
@@ -190,6 +200,7 @@ export class PipelineGraph extends Graph {
   bindMouseenter(): void {
     this.on("node:mouseenter", (evt: { item: Item }) => {
       this.searchChildMove((<INode>evt.item).getID(), depthFirstSearch);
+      this.setTaskName(<INode>evt.item, "update-node")
       this.setItemState(evt.item, "hover", true);
     });
   }
